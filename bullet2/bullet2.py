@@ -669,8 +669,10 @@ class Bullet:
 
 class Platform:
     def __init__(self, app_canv):
-        self.image_path_rl=PhotoImage(file='C:\\Users\\dermo\\pyimages\\pigplatform_rl.gif')
-        self.image_path_lr=PhotoImage(file='C:\\Users\\dermo\\pyimages\\pigplatform_lr.gif')
+        #self.image_path_rl=PhotoImage(file='C:\\Users\\dermo\\pyimages\\pigplatform_rl.gif')
+        self.image_path_rl=PhotoImage(file='bullet_images/pigplatform_rl.gif')
+        #self.image_path_lr=PhotoImage(file='C:\\Users\\dermo\\pyimages\\pigplatform_lr.gif')
+        self.image_path_lr=PhotoImage(file='bullet_images/pigplatform_lr.gif')
         #self.image_path=Image.open("C:\\Users\\dermo\\pyimages\\pigplatform.gif")
         self.image_resized=self.image_path_lr.subsample(5,5)
         self.delta=25 # смещение верхней границы относительно границ рисунка
@@ -724,7 +726,8 @@ class Life:
 class Acorn:
     def __init__(self, app_canv):
         #app_canv это app.canv
-        self.image_path=PhotoImage(file='C:\\Users\\dermo\\pyimages\\acorn.gif')
+        #self.image_path=PhotoImage(file='C:\\Users\\dermo\\pyimages\\acorn.gif')
+        self.image_path=PhotoImage(file='bullet_images/acorn.gif') 
         #self.image_path=Image.open("C:\\Users\\dermo\\pyimages\\pigplatform.gif")
         self.image_resized=self.image_path.subsample(15,15)
         self.x0=random.randint(6, 573)

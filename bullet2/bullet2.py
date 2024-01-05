@@ -6,6 +6,7 @@ import time
 from PIL import Image, ImageTk
 import random
 import threading 
+#import bullet_images
 from tsfigures import Heart #импортирую свой класс из своей библиотеки,
 #подробности этого класса можно прочитать в модуле heart.py в папке tsfigures
 def close_window():

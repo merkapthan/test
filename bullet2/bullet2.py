@@ -1133,7 +1133,7 @@ tk1.protocol("WM_DELETE_WINDOW", close_window)
 if not app:
     sys.exit()
 if not tk1.winfo_exists():
-    sys.exit()    
+    sys.exit()    #гавно
 tk1.mainloop()
 if tk1.winfo_exists():
     sys.exit()

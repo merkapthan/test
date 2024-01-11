@@ -325,29 +325,29 @@ class Animapp:
             alltags=[]
             dict_boards_1={"upboard":0, "leftboard":0, "downboard":0, "rightboard":0}  #словарь линия:число пересечений линии с пулей
             dict_boards={'upline': 0, 'leftline': 0, 'rightline': 0, 'downline': 0}
-            print(f"оверлапин_обджектс: {overlapping_objects}")
+            #print(f"оверлапин_обджектс: {overlapping_objects}")
             for object in overlapping_objects:
                 i=0
                 tags=self.canv.gettags(object)
-                print(f"теги: {tags}")
+                #print(f"теги: {tags}")
                 alltags+=tags
-                print(f"всетеги {i}-я итерация: {alltags}")  
+                #print(f"всетеги {i}-я итерация: {alltags}")  
                 i+=1
                 
                 if "brick" in tags and "rectangle" in tags: #если срабатывает, значит мы нашли brick.form
-                    print("нашли брик и ректангл")
+                    #print("нашли брик и ректангл")
                     
                     brick=self.testmap.form_and_brick_dict[object]#получаем наш объект кубика из словаря по ключу его формы
 
                     #логика возвращающая переменные ударов зависимо от того что в оверлапингобджектс
                     #brick.change_brick_hp(self.canv) #меняем хп кубика
-                    print(self.testmap.form_and_brick_dict[object])
+                    #print(self.testmap.form_and_brick_dict[object])
                     #dict_boards=Animapp.brick_boards_over_bullet(hitting_bullet, brick, dict_boards)
                     dict_boards=self.brick_boards_over_bullet(hitting_bullet,brick, dict_boards )
                     Brick.change_brick_hp(self.testmap.form_and_brick_dict[object],self.canv) #меняем хп кубика
-                    print(f"cнова теги: {tags}")
+                    #print(f"cнова теги: {tags}")
                 else:
-                    print("в тегах нет брик и ректангл")
+                    #print("в тегах нет брик и ректангл")
                     continue #если иф не сработал, значит объект не форма, а нам такое не надо
               
             #tags_to_ignore=["bullet", "brick", "line", "rectangle"]  
@@ -535,8 +535,8 @@ class Animapp:
                                 else:
                                     bullet_obj.vx_current=bullet_obj.vx_0 
                                 #new_velocity=x_velocity
-                                print(f"скорость из класса{bullet_obj.vx_0}")
-                                print(f"скорость текущая{bullet_obj.vx_current}")
+                                #print(f"скорость из класса{bullet_obj.vx_0}")
+                                #print(f"скорость текущая{bullet_obj.vx_current}")
                                 #None
                             elif self.current_press=="left" and bullet_obj.vx_current<0:
                                 if self.delay==1:
@@ -545,8 +545,8 @@ class Animapp:
                                 else:
                                     bullet_obj.vx_current=bullet_obj.vx_0    
                                #new_velocity=x_velocity
-                                print(f"скорость из класса{bullet_obj.vx_0}")
-                                print(f"скорость текущая{bullet_obj.vx_current}")
+                                #print(f"скорость из класса{bullet_obj.vx_0}")
+                                #print(f"скорость текущая{bullet_obj.vx_current}")
                                 #None
                             else:
                                 bullet_obj.vx_0=bullet_obj.vx_0*(-1)
@@ -600,19 +600,22 @@ class Animapp:
                         if self.bullet_hits_platform(bullet_obj.form, self.platform)=="E_hit" or self.bullet_hits_platform(bullet_obj.form, self.platform)=="W_hit": #проверка столкновений с краями платформы
                            bullet_obj.vx_current=bullet_obj.vx_current*(-1)    
                         #отскоки от кубиков
-                        hit=self.bullet_hits_bricks(bullet_obj.form)   
-                        if hit=="NE_hit" or hit=="NW_hit" or hit=="SW_hit" or hit=="SE_hit":
-                            bullet_obj.vy_0=bullet_obj.vy_0*(-1)
-                            bullet_obj.vx_current=bullet_obj.vx_current*(-1)  
-                            print("отскок")  
-                        if hit=="N_hit" or hit=="S_hit":
-                            bullet_obj.vy_0=bullet_obj.vy_0*(-1)  
-                            print("отскок") 
-                        if hit=="E_hit" or hit=="W_hit": 
-                           bullet_obj.vx_current=bullet_obj.vx_current*(-1)    
-                           print("отскок") 
-                        if hit=="nothing":
-                            None   
+                        try:   
+                            hit=self.bullet_hits_bricks(bullet_obj.form)   
+                            if hit=="NE_hit" or hit=="NW_hit" or hit=="SW_hit" or hit=="SE_hit":
+                                bullet_obj.vy_0=bullet_obj.vy_0*(-1)
+                                bullet_obj.vx_current=bullet_obj.vx_current*(-1)  
+                                print("отскок")  
+                            if hit=="N_hit" or hit=="S_hit":
+                                bullet_obj.vy_0=bullet_obj.vy_0*(-1)  
+                                print("отскок") 
+                            if hit=="E_hit" or hit=="W_hit": 
+                                bullet_obj.vx_current=bullet_obj.vx_current*(-1)    
+                                print("отскок") 
+                            if hit=="nothing":
+                                None   
+                        except AttributeError:  
+                            None      
                         #следующие два так же нужны для определения направления при столкновениях (в коде выше)    
                         #возможная ошибка - если в самый начальный момент времени происходит то редкое столкновение, а эти два аргумента =None
                         #в этом случае будет происходить сравнение чисел с None. Но такие ситуации по идее невозможны по сценарию, но можно и обработать   
@@ -626,7 +629,7 @@ class Animapp:
              
                 tk1.update()
                 #скорость отрисовки снарядов
-                #time.sleep(0.04) 
+                #time.sleep(0.4) 
                 time.sleep(0.05)  
                 self.canv.update_idletasks()            
                 
@@ -739,6 +742,12 @@ class Platform:
             # Создать новое отраженное изображение
         self.plat = app_canv.create_image(self.SW_coord_x, self.SW_coord_y, anchor=SW, image=self.image_resized)    
 
+    def speed_up(self, delta_v, duration, app_canv):
+        def speed_down():
+            self.velocity-=delta_v
+        self.velocity+=delta_v
+        app_canv.after(duration, speed_down)        
+
 class Life:
     def __init__(self, x1,  x2, app_canv):
         self.oxy1=x1
@@ -767,8 +776,10 @@ class Acorn:
         #self.image_resized=self.image_path.subsample(15,15)
         if random.randint(1,6)<5: 
             self.image_resized=Acorn.image_acorn_life_resized
+            self.effect="life"
         else:
              self.image_resized=Acorn.image_acorn_energy_resized   
+             self.effect="energy"
         self.x0=random.randint(6, 573)
     
         self.y0=-40
@@ -819,7 +830,12 @@ class Acorn:
 
             #проверка столкновения с платформой 
             if app.acorn_hits_platform(self.plat, app.platform)=="N_hit" or app.acorn_hits_platform(self.plat, app.platform)=="E_hit" or app.acorn_hits_platform(self.plat, app.platform)=="W_hit": #проверка столкновений с краями платформы
-                app.set_life_extra(10,35) 
+                if self.effect=="life":
+                    app.set_life_extra(10,35) 
+                elif self.effect=="energy":
+                    app.platform.speed_up(delta_v=5, duration=15000, app_canv=app_canv)    
+                    newtimer=Timer()
+                    newtimer.pack_timer(duration=15000, power=1, app_canv=app_canv)
                 print(app.hp) 
                 app_canv.delete(self) 
                 app_canv.delete(self.upline) 
@@ -977,7 +993,7 @@ class Brick: #кубики, которые и надо выбивать
         del self.y1    
         del self
         app.win()
-        print(f"словарь форм и кубов {app.testmap.form_and_brick_dict}")
+        #print(f"словарь форм и кубов {app.testmap.form_and_brick_dict}")
 
 
     @classmethod
@@ -1070,7 +1086,9 @@ class Map: #карта, на которой расположатся кубик�
             app_canv.after(150, wait_helper)       
            # except TypeError:
                 #print("тайпэррор")
-        wait_helper()      
+        wait_helper()  
+
+         
 
 class PicMessage:
     win_pic_path=PhotoImage(file='bullet_images/win_picture.gif')
@@ -1081,9 +1099,38 @@ class PicMessage:
         app.win_message=app.canv.create_image(10, 10, anchor=NW, image=cls.win_pic_path)
     @classmethod
     def loose_message(cls):
-        app.loose_message=app.canv.create_image(596, 10, anchor=NE, image=cls.loose_pic_path)
+        app.loose_message=app.canv.create_image(596, 10, anchor=NE, image=cls.loose_pic_path)   
            
+class Timer:
+    j=0
+    def __init__(self):
 
+        self.i=0
+        self.object_type="timer"
+        self.x0=560-30*Timer.j
+        Timer.j+=1
+    def pack_timer(self, duration, power, app_canv):
+        
+        current_time=(duration-self.i*1000)/1000
+        time_text=app_canv.create_text(self.x0, 40, text=f"{current_time}", font=('Courier',10))
+        
+        self.i+=1
+        if current_time==0:
+            app_canv.delete(time_text)
+            Timer.j=0
+            return
+        else:
+            app_canv.after(1000, lambda:app_canv.delete(time_text))
+            app_canv.after(1000, lambda:self.pack_timer(duration, power, app_canv))
+
+class CanvMessage(Timer, PicMessage):
+    @classmethod
+    def pack_message(cls):
+        pass               
+        
+
+
+        
         
 app=Animapp() 
 

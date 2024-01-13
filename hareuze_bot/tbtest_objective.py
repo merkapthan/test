@@ -15,6 +15,7 @@ class Bot:
         self.datastorage=Datastorage()
         #self.keybord_level=0 - потом пригодится
         self.wft={} #waiting_for_text сокращенно
+        self.wfl={} #waiting_for_language
 
         
         self.bot.message_handler(commands=['start'])(self.start_message)
@@ -52,9 +53,9 @@ class Bot:
     
     def send_reaction(self, message):
         if message.chat.id in self.wft and self.wft[message.chat.id]: 
-            result_text=ForLang.solar_lang(message)
+            result_text=ForLang.translate(message, self.wfl[message.chat.id])
             self.bot.send_message(message.chat.id, result_text)
-            self.bot.send_message(message.chat.id, "пока баговано")
+            #self.bot.send_message(message.chat.id, "пока баговано")
             self.wft[message.chat.id]=False
         else:    
             if message.text.lower() == "анекдот":
@@ -65,6 +66,8 @@ class Bot:
                 self.bot.send_message(message.chat.id, github_link, parse_mode="HTML")   
             elif message.text.lower() == "погода":
                 self.bot.send_message(message.chat.id, "мне впадлу возиться с api погодных сервисов ")
+            elif message.text.lower() == "аналитика от эксперта по всем вопросам":
+                self.bot.send_message(message.chat.id, "мне впадлу возиться с этим пока ")
             elif message.text.lower()=="список команд":
                 command_dict_str = json.dumps(self.datastorage.command_dict, ensure_ascii=False)
                 self.bot.send_message(message.chat.id, command_dict_str)    
@@ -73,12 +76,16 @@ class Bot:
             elif message.text.lower()=="назад":    
                 self.start_message(message)
 
-            elif message.text.lower()=="солнечный":    
+            elif message.text.lower()=="солнечный":
+                self.bot.send_message(message.chat.id, "напишите фразу для перевода")   
                 #self.solar_lang(message)
                 self.wft[message.chat.id]=True
-            elif message.text.lower()=="кирпичный":    
+                self.wfl[message.chat.id]="sol"
+            elif message.text.lower()=="кирпичный": 
+                self.bot.send_message(message.chat.id, "напишите фразу для перевода")      
                 #self.solar_lang(message)
                 self.wft[message.chat.id]=True
+                self.wfl[message.chat.id]="brick"
 
             else:
                 self.unknown_message(message)    
@@ -112,39 +119,86 @@ class Datastorage:
     def __init__(self):
         self.command_dict = {"/start": "начать", "/hi": "реплай привета", "/sum": "сумма чисел", "/help":"список команд"}
         self.jokes = tstb_storage.jokes
+        self.vowels = {"eng":"aeiou", "rus":"аеёиоуыэюя"}
+        self.consonants =  {"eng":"bcdfghjklmnpqrstvwxyz", "rus":"бвгджзйклмнпрстфхцчшщ"}
 
 class ForLang:
+    @staticmethod #метод, ставящий пробелы между буквами
+    def add_spaces(text):
+        spaced_text = ""
+        for char in text:
+            if char.isalpha():
+                spaced_text += char + " "
+            elif char.isspace():
+                spaced_text += char * 2
+        return spaced_text
+    
+    @staticmethod #метод, удаляющий слог (слоги) из предложения
+    def remove_syllables(sentence, syllable):
+        #for syllable in syllables:
+        sentence = sentence.replace(syllable, "")
+        return sentence
+    
     @staticmethod
-    def solar_lang(message):
-        words=message.text.split()
-        result_text=[]
-        for word in words:
-            syllables=ForLang.split_into_syllables(word)
-            result_text+=syllables
-        return result_text    
-          
+    def sentence_to_list(sentence): #метод, делающий список из слов в предложении
+        words_list = sentence.split()
+        return words_list
+    
+    @staticmethod
+    def insert_s_after_vowels(word): #метод переводит отдельные слова на солнечный   
+        new_word=""
+        for char in word:
+            new_word+=char
+            if char.lower() in bot.datastorage.vowels["rus"]:
+                new_word+="с"+char.lower()
+            elif char.lower() in bot.datastorage.vowels["eng"]:
+                new_word+="s"+char.lower()    
+
+        return new_word
+    
+    @staticmethod
+    def insert_p_before_syllables(word): #метод переводит отдельные слова на кирпичный  
+        new_word="" 
+        new_syl=""      
+        to_add="" 
+        for char in word:            
+            new_syl+=char
+            to_add+=char
+            if char.lower() in bot.datastorage.vowels["rus"]:
+                new_syl="п"+char.lower()+new_syl
+                new_word+=new_syl
+                new_syl="" 
+                to_add=""
+                #break
+            elif char.lower() in bot.datastorage.vowels["eng"]:
+                new_syl="p"+char.lower()+new_syl
+                new_word+=new_syl
+                new_syl="" 
+                to_add=""
+                #break
+            #new_word+=new_syl   
+        #for i in range(len(list(word))):             
+            #if list(word)[-i-1] in bot.datastorage.vowels:
+               # break
+           # to_add+=str(list(word)[-i-1])
+        #new_word+=to_add[::-1]  
+        new_word+=to_add      
+        return new_word
 
     @staticmethod
-    def split_into_syllables(text): #с помощью pyphen
-        dic = pyphen.Pyphen(lang='ru')  # указываем язык (в данном случае русский)
-        syllables = dic.inserted(text).split('-')
-        return syllables  
-    
-    
-    @staticmethod
-    def split_into_syllables_pymorph2(text): #с помощью pymorph2 и видимо оно вообще не работает
-        morph = pymorphy2.MorphAnalyzer()
-        parsed_word = morph.parse(text)[0]
-        syllables = parsed_word[0].word.split('-')
-        return syllables
-    
-    @staticmethod
-    def feature_sl_decorator(method_to_decorate): #декоратор, который фиксит неработающий метод solar_lang
-        def wrapper(*args, **kwargs):
-            # Дополнительная логика перед вызовом метода
-            print("Дополнительная логика перед вызовом метода")
-            return method_to_decorate(*args, **kwargs)
-        return wrapper
+    def translate(message, lang):
+        text=message.text
+        words_list=ForLang.sentence_to_list(text)
+        new_words_list=[]
+        for word in words_list:
+            if lang=="sol":
+                new_word=ForLang.insert_s_after_vowels(word)
+            elif lang=="brick":
+                new_word=ForLang.insert_p_before_syllables(word)
+            new_words_list.append(new_word)
+        new_text=" ".join(new_words_list)
+        return new_text.capitalize()
+
 
 
 bot = Bot(tstb_token.tokenforbot)
